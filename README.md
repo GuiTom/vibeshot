@@ -38,6 +38,25 @@ npm run dev
 
 打开 [http://localhost:3000](http://localhost:3000) 查看应用。
 
+### Google Analytics 统计
+
+项目已预留 `GA4` 埋点。配置环境变量后即可启用：
+
+```bash
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
+
+推荐放到 `.env.local` 或生产环境变量中。
+
+### Google Search Console
+
+项目已包含：
+
+- `/robots.txt`
+- `/sitemap.xml`
+
+正式站点默认按 `https://music.aihelper360.com` 生成。
+
 ### 构建生产版本
 
 ```bash

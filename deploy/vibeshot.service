@@ -1,0 +1,17 @@
+[Unit]
+Description=VibeShot Next.js App
+After=network.target
+
+[Service]
+Type=simple
+User=azureuser
+WorkingDirectory=/var/www/vibeshot/current
+EnvironmentFile=/var/www/vibeshot/shared/.env.production
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/vibeshot/app.log
+StandardError=append:/var/log/vibeshot/app.error.log
+
+[Install]
+WantedBy=multi-user.target

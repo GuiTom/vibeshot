@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>清除存储</title>
+</head>
+<body>
+  <h2>清除 VibeShot 本地存储</h2>
+  <p>这将清除所有照片、设置和次数记录</p>
+  <button onclick="clearAll()">清除所有数据</button>
+  <script>
+    function clearAll() {
+      localStorage.removeItem('vibeshot-storage');
+      alert('已清除！现在刷新页面即可重置为默认次数 (10次)');
+    }
+  </script>
+</body>
+</html>

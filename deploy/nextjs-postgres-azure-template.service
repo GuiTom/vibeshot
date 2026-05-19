@@ -1,0 +1,17 @@
+[Unit]
+Description={{APP_NAME}} Next.js App
+After=network.target
+
+[Service]
+Type=simple
+User=azureuser
+WorkingDirectory=/var/www/{{APP_NAME}}/current
+EnvironmentFile=/var/www/{{APP_NAME}}/shared/.env.production
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/{{APP_NAME}}/app.log
+StandardError=append:/var/log/{{APP_NAME}}/app.error.log
+
+[Install]
+WantedBy=multi-user.target

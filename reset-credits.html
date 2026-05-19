@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>重置生成次数</title>
+</head>
+<body>
+  <h2>点击下方按钮重置生成次数</h2>
+  <button onclick="resetCredits()">重置次数</button>
+  <script>
+    function resetCredits() {
+      try {
+        const data = JSON.parse(localStorage.getItem('vibeshot-storage') || '{}');
+        if (data.state?.subscription) {
+          data.state.subscription.remainingCredits = 3;
+          localStorage.setItem('vibeshot-storage', JSON.stringify(data));
+          alert('已重置！剩余次数: 3');
+        } else {
+          alert('未找到存储数据');
+        }
+      } catch (e) {
+        alert('错误: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
