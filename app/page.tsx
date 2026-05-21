@@ -18,7 +18,26 @@ import PhotoGenerator from '@/components/PhotoGenerator'
 import ResultGallery from '@/components/ResultGallery'
 import { useAppStore } from '@/store/useAppStore'
 
-function HomeContent() {
+export default function Home() {
+  return (
+    <Suspense fallback={<HomeContent checkoutState={null} />}>
+      <HomeSearchParamsBoundary />
+    </Suspense>
+  )
+}
+
+function HomeSearchParamsBoundary() {
+  const searchParams = useSearchParams()
+  const checkoutState = searchParams.get('checkout')
+
+  return <HomeContent checkoutState={checkoutState} />
+}
+
+interface HomeContentProps {
+  checkoutState: string | null
+}
+
+function HomeContent({ checkoutState }: HomeContentProps) {
   const {
     currentStep,
     user,
@@ -30,10 +49,8 @@ function HomeContent() {
     resetFlow,
   } = useAppStore()
   const { data: session, status } = useSession()
-  const searchParams = useSearchParams()
   const router = useRouter()
   const [showCheckoutBanner, setShowCheckoutBanner] = useState(false)
-  const checkoutState = searchParams.get('checkout')
 
   const checkoutBannerText = useMemo(() => {
     if (checkoutState !== 'success') {
@@ -54,7 +71,6 @@ function HomeContent() {
     return '支付成功，套餐信息已更新。'
   }, [checkoutState, user?.subscription?.remainingCredits, user?.subscription?.type])
 
-  // Scroll to top when step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [currentStep])
@@ -108,9 +124,7 @@ function HomeContent() {
               prompt: item.prompt,
             }))
           )
-          setGenerationHistory(
-            normalizedHistory
-          )
+          setGenerationHistory(normalizedHistory)
         }
       } catch (error) {
         console.error('Failed to load generation history:', error)
@@ -166,7 +180,16 @@ function HomeContent() {
     return () => {
       cancelled = true
     }
-  }, [clearGenerationHistory, resetFlow, session, setGeneratedPhotos, setGenerationHistory, setSubscription, setUser, status])
+  }, [
+    clearGenerationHistory,
+    resetFlow,
+    session,
+    setGeneratedPhotos,
+    setGenerationHistory,
+    setSubscription,
+    setUser,
+    status,
+  ])
 
   function dismissCheckoutBanner() {
     setShowCheckoutBanner(false)
@@ -227,7 +250,6 @@ function HomeContent() {
             transition={{ duration: 0.3 }}
             className="min-h-screen pt-24 pb-12 px-4"
           >
-            {/* Step indicator */}
             <div className="max-w-7xl mx-auto mb-8">
               <div className="flex items-center justify-center space-x-4">
                 {['home', 'upload', 'design', 'select', 'generate', 'result'].map((step, index, steps) => {
@@ -241,8 +263,8 @@ function HomeContent() {
                           isActive
                             ? 'bg-primary-600 text-white'
                             : isPast
-                            ? 'bg-primary-500/50 text-white'
-                            : 'bg-dark-100 text-gray-500'
+                              ? 'bg-primary-500/50 text-white'
+                              : 'bg-dark-100 text-gray-500'
                         }`}
                       >
                         {index + 1}
@@ -260,7 +282,6 @@ function HomeContent() {
               </div>
             </div>
 
-            {/* Step content */}
             <div className="max-w-7xl mx-auto">
               {currentStep === 'upload' && <PhotoUploader />}
               {currentStep === 'design' && <AppearanceDesigner />}
@@ -272,13 +293,5 @@ function HomeContent() {
         )}
       </AnimatePresence>
     </main>
-  )
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<main className="min-h-screen bg-dark-300" />}>
-      <HomeContent />
-    </Suspense>
   )
 }

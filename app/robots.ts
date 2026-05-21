@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://music.aihelper360.com/sitemap.xml',
-    host: 'https://music.aihelper360.com',
+    sitemap: 'https://vibeshot.aihelper360.com/sitemap.xml',
+    host: 'https://vibeshot.aihelper360.com',
   }
 }
