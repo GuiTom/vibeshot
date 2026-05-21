@@ -204,3 +204,22 @@ az vm run-command invoke \
 
 - 本地网络导致的 SSH 问题
 - 或重建 Azure Bastion
+
+## 7. `vibeshot.aihelper360.com` 无法访问的排障记录
+
+这次的问题不是源站，也不是 Nginx 或 SSL。
+
+- 现象：`vibeshot.aihelper360.com` 打不开，公网 DNS 解析返回 `NXDOMAIN`
+- 排查结果：`music.aihelper360.com` 正常，但 Cloudflare 里没有 `vibeshot` 这条 DNS 记录
+- 已确认：Cloudflare 的 `SSL/TLS` 是 `Full`，`Rules` 里也没有针对 `vibeshot` 的拦截规则
+- 结论：根因是 DNS 漏配，不是服务器故障
+
+修复方式：
+
+```text
+A vibeshot -> 20.9.192.191
+Proxy: Proxied
+TTL: Auto
+```
+
+补完后公网即可正常访问。

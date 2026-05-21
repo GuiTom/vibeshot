@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -18,6 +18,25 @@ import ResultGallery from '@/components/ResultGallery'
 import { useAppStore } from '@/store/useAppStore'
 
 export default function Home() {
+  return (
+    <Suspense fallback={<HomeContent checkoutState={null} />}>
+      <HomeSearchParamsBoundary />
+    </Suspense>
+  )
+}
+
+function HomeSearchParamsBoundary() {
+  const searchParams = useSearchParams()
+  const checkoutState = searchParams.get('checkout')
+
+  return <HomeContent checkoutState={checkoutState} />
+}
+
+interface HomeContentProps {
+  checkoutState: string | null
+}
+
+function HomeContent({ checkoutState }: HomeContentProps) {
   const {
     currentStep,
     user,
@@ -27,10 +46,8 @@ export default function Home() {
     resetFlow,
   } = useAppStore()
   const { data: session, status } = useSession()
-  const searchParams = useSearchParams()
   const router = useRouter()
   const [showCheckoutBanner, setShowCheckoutBanner] = useState(false)
-  const checkoutState = searchParams.get('checkout')
 
   const checkoutBannerText = useMemo(() => {
     if (checkoutState !== 'success') {

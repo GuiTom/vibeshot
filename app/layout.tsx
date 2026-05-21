@@ -10,7 +10,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://music.aihelper360.com'),
+  metadataBase: new URL('https://vibeshot.aihelper360.com'),
   title: 'VibeShot - AI 形象摄影师',
   description: '让每一个"不会拍照"的男生，都能拥有让人眼前一亮的人物照片。AI 摄影师 + AI 形象顾问，帮助你生成高质量社交照片。',
   keywords: 'AI照片生成, 男生拍照, 社交头像, 形象照, AI摄影师, 姿势推荐',
