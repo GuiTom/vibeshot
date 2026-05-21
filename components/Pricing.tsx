@@ -108,11 +108,6 @@ export default function Pricing() {
   }
 
   function handleFreePlan() {
-    if (status !== 'authenticated') {
-      signIn('google', { callbackUrl: '/#pricing' })
-      return
-    }
-
     setCurrentStep('upload')
   }
 

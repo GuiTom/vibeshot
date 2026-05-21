@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,16 +12,19 @@ import Features from '@/components/Features'
 import Pricing from '@/components/Pricing'
 import Footer from '@/components/Footer'
 import PhotoUploader from '@/components/PhotoUploader'
+import AppearanceDesigner from '@/components/AppearanceDesigner'
 import StyleSelector from '@/components/StyleSelector'
 import PhotoGenerator from '@/components/PhotoGenerator'
 import ResultGallery from '@/components/ResultGallery'
 import { useAppStore } from '@/store/useAppStore'
 
-export default function Home() {
+function HomeContent() {
   const {
     currentStep,
     user,
     setUser,
+    setSubscription,
+    setGeneratedPhotos,
     setGenerationHistory,
     clearGenerationHistory,
     resetFlow,
@@ -87,12 +90,26 @@ export default function Home() {
 
         const payload = await response.json()
         if (!cancelled) {
-          setGenerationHistory(
-            (payload.data ?? []).map((item: any) => ({
-              ...item,
-              createdAt: new Date(item.createdAt),
-              updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+          const normalizedHistory = (payload.data ?? []).map((item: any) => ({
+            ...item,
+            createdAt: new Date(item.createdAt),
+            updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+          }))
+
+          setGeneratedPhotos(
+            normalizedHistory.map((item: any) => ({
+              id: item.id,
+              userId: item.userId,
+              styleId: item.styleId,
+              sceneId: item.sceneId,
+              imageUrl: item.imageUrl,
+              thumbnailUrl: item.thumbnailUrl,
+              createdAt: item.createdAt,
+              prompt: item.prompt,
             }))
+          )
+          setGenerationHistory(
+            normalizedHistory
           )
         }
       } catch (error) {
@@ -105,22 +122,25 @@ export default function Home() {
         const account = await loadAccount()
 
         if (!cancelled) {
+          const nextSubscription = {
+            type: account?.subscriptionPlan ?? 'free',
+            remainingCredits: account?.creditsRemaining ?? 3,
+            totalCredits: account?.creditsTotal ?? 3,
+            expiresAt: account?.subscriptionExpiresAt
+              ? new Date(account.subscriptionExpiresAt)
+              : null,
+            status: account?.subscriptionStatus ?? null,
+          }
+
           setUser({
             id: account?.id ?? session.user.id ?? session.user.email ?? 'authenticated-user',
             name: account?.name ?? session.user.name ?? undefined,
             email: account?.email ?? session.user.email ?? undefined,
             avatar: account?.image ?? session.user.image ?? undefined,
             createdAt: account?.createdAt ? new Date(account.createdAt) : new Date(),
-            subscription: {
-              type: account?.subscriptionPlan ?? 'free',
-              remainingCredits: account?.creditsRemaining ?? 3,
-              totalCredits: account?.creditsTotal ?? 3,
-              expiresAt: account?.subscriptionExpiresAt
-                ? new Date(account.subscriptionExpiresAt)
-                : null,
-              status: account?.subscriptionStatus ?? null,
-            },
+            subscription: nextSubscription,
           })
+          setSubscription(nextSubscription)
         }
 
         loadGenerationHistory()
@@ -146,7 +166,7 @@ export default function Home() {
     return () => {
       cancelled = true
     }
-  }, [clearGenerationHistory, resetFlow, session, setGenerationHistory, setUser, status])
+  }, [clearGenerationHistory, resetFlow, session, setGeneratedPhotos, setGenerationHistory, setSubscription, setUser, status])
 
   function dismissCheckoutBanner() {
     setShowCheckoutBanner(false)
@@ -210,9 +230,9 @@ export default function Home() {
             {/* Step indicator */}
             <div className="max-w-7xl mx-auto mb-8">
               <div className="flex items-center justify-center space-x-4">
-                {['home', 'upload', 'select', 'generate', 'result'].map((step, index) => {
+                {['home', 'upload', 'design', 'select', 'generate', 'result'].map((step, index, steps) => {
                   const isActive = currentStep === step
-                  const isPast = ['home', 'upload', 'select', 'generate', 'result'].indexOf(currentStep) > index
+                  const isPast = steps.indexOf(currentStep) > index
 
                   return (
                     <div key={step} className="flex items-center">
@@ -227,7 +247,7 @@ export default function Home() {
                       >
                         {index + 1}
                       </div>
-                      {index < 4 && (
+                      {index < steps.length - 1 && (
                         <div
                           className={`w-12 h-0.5 mx-2 transition-colors ${
                             isPast ? 'bg-primary-500' : 'bg-gray-700'
@@ -243,6 +263,7 @@ export default function Home() {
             {/* Step content */}
             <div className="max-w-7xl mx-auto">
               {currentStep === 'upload' && <PhotoUploader />}
+              {currentStep === 'design' && <AppearanceDesigner />}
               {currentStep === 'select' && <StyleSelector />}
               {currentStep === 'generate' && <PhotoGenerator />}
               {currentStep === 'result' && <ResultGallery />}
@@ -251,5 +272,13 @@ export default function Home() {
         )}
       </AnimatePresence>
     </main>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-dark-300" />}>
+      <HomeContent />
+    </Suspense>
   )
 }

@@ -23,6 +23,15 @@ export default function PhotoUploader({ onComplete }: PhotoUploaderProps) {
   const { userPhotos, addUserPhoto, removeUserPhoto } = useAppStore()
   const [draggingType, setDraggingType] = useState<string | null>(null)
 
+  const fileToDataUrl = useCallback((file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = () => reject(new Error('图片读取失败'))
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
   const handleDragOver = useCallback((e: React.DragEvent, typeId: string) => {
     e.preventDefault()
     setDraggingType(typeId)
@@ -51,13 +60,13 @@ export default function PhotoUploader({ onComplete }: PhotoUploaderProps) {
         return
       }
 
-      const url = URL.createObjectURL(file)
+      const url = await fileToDataUrl(file)
       addUserPhoto({
         url,
         type: typeId as UserPhoto['type'],
       })
     },
-    [addUserPhoto]
+    [addUserPhoto, fileToDataUrl]
   )
 
   const handleFileSelect = useCallback(
@@ -75,13 +84,13 @@ export default function PhotoUploader({ onComplete }: PhotoUploaderProps) {
         return
       }
 
-      const url = URL.createObjectURL(file)
+      const url = await fileToDataUrl(file)
       addUserPhoto({
         url,
         type: typeId as UserPhoto['type'],
       })
     },
-    [addUserPhoto]
+    [addUserPhoto, fileToDataUrl]
   )
 
   const getPhotosByType = (type: string) => {
@@ -242,7 +251,7 @@ export default function PhotoUploader({ onComplete }: PhotoUploaderProps) {
             const currentPhotos = useAppStore.getState().userPhotos
             const frontPhotos = currentPhotos.filter(p => p.type === 'front')
             if (frontPhotos.length > 0) {
-              useAppStore.getState().setCurrentStep('select')
+              useAppStore.getState().setCurrentStep('design')
               onComplete?.()
             } else {
               alert('请上传正脸照')
@@ -250,7 +259,7 @@ export default function PhotoUploader({ onComplete }: PhotoUploaderProps) {
           }}
           className="px-8 py-3 rounded-xl font-semibold bg-primary-600 hover:bg-primary-500 text-white transition-all"
         >
-          下一步：选择风格
+          下一步：设计形象
         </button>
       </div>
     </div>

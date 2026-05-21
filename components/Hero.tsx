@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Zap, Shield, Camera } from 'lucide-react'
-import { useSession, signIn } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useAppStore } from '@/store/useAppStore'
 
 const features = [
@@ -88,15 +88,11 @@ export default function Hero() {
           >
             <button
               onClick={() => {
-                if (!isAuthenticated) {
-                  signIn('google', { callbackUrl: '/' })
-                  return
-                }
                 setCurrentStep('upload')
               }}
               className="group px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white rounded-xl font-semibold text-lg transition-all duration-300 animate-pulse-glow flex items-center"
             >
-              {isAuthenticated ? '立即免费生成' : '登录后开始生成'}
+              {isAuthenticated ? '立即免费生成' : '先体验生成流程'}
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             <span className="text-gray-500 text-sm">免费生成 3 张照片</span>

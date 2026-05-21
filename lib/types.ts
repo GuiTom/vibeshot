@@ -13,6 +13,7 @@ export interface PoseStyle {
   nameEn: string
   description: string
   icon: string
+  previewUrl: string
   tags: string[]
   parameters: {
     pose: string

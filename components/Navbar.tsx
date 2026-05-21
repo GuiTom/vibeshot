@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Camera, Menu, X, User } from 'lucide-react'
 import { useState } from 'react'
-import { signIn, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useAppStore } from '@/store/useAppStore'
 import { cn } from '@/lib/utils'
 import AuthButtons from '@/components/AuthButtons'
@@ -30,11 +30,6 @@ export default function Navbar() {
   }
 
   function handlePrimaryAction() {
-    if (!isAuthenticated) {
-      signIn('google', { callbackUrl: '/' })
-      return
-    }
-
     if (currentStep !== 'home') {
       setCurrentStep('home')
       return

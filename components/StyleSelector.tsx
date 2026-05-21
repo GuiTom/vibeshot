@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Check, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
 import { poseStyles, sceneTemplates } from '@/lib/data'
@@ -31,23 +31,19 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
 
   const selectedStyle = poseStyles.find((s) => s.id === selectedStyleId)
   const selectedScene = sceneTemplates.find((s) => s.id === selectedSceneId)
-
-  // 风格必须选，场景可选（默认使用第一个）
-  const canGenerate = !!selectedStyleId
+  const canGenerate = !!selectedStyleId && !!selectedSceneId
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-display font-bold text-white mb-2">
-          选择风格和场景
+          选择拍照姿势和环境模板
         </h2>
         <p className="text-gray-400">
-          AI 会根据你的选择生成最适合的照片
+          最后一步不是抽象风格，而是先选人物姿势，再选一张环境模板图。生成时会把模板图里的人替换成你，并尽量保留你已经确认好的服装。
         </p>
       </div>
 
-      {/* Tabs */}
       <div className="flex justify-center mb-8">
         <div className="inline-flex p-1 rounded-xl bg-dark-100">
           <button
@@ -59,7 +55,7 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
                 : 'text-gray-400 hover:text-white'
             )}
           >
-            姿势风格
+            拍照姿势模板
           </button>
           <button
             onClick={() => setActiveTab('scene')}
@@ -70,20 +66,19 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
                 : 'text-gray-400 hover:text-white'
             )}
           >
-            场景模板
+            环境模板图
           </button>
         </div>
       </div>
 
-      {/* Style grid */}
       {activeTab === 'style' && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8"
         >
           {poseStyles.map((style) => (
-            <StyleCard
+            <PoseTemplateCard
               key={style.id}
               style={style}
               selected={selectedStyleId === style.id}
@@ -93,15 +88,14 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
         </motion.div>
       )}
 
-      {/* Scene grid */}
       {activeTab === 'scene' && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8"
         >
           {sceneTemplates.map((scene) => (
-            <SceneCard
+            <SceneTemplateCard
               key={scene.id}
               scene={scene}
               selected={selectedSceneId === scene.id}
@@ -111,7 +105,6 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
         </motion.div>
       )}
 
-      {/* AI Recommendation banner */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -121,10 +114,10 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
           <Sparkles className="w-6 h-6 text-primary-400" />
           <div>
             <p className="text-sm font-medium text-white">
-              智能推荐已准备就绪
+              当前生成逻辑会优先做“人物替换”
             </p>
             <p className="text-xs text-gray-400">
-              基于你上传的照片，AI 会自动匹配风格组合，并对发型与人像细节做克制优化
+              AI 会优先保留模板里的镜头关系、背景、光线和构图，把模板图中的人物替换成你，而不是重新凭空生成一张抽象风格图。
             </p>
           </div>
         </div>
@@ -181,7 +174,7 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
             <div>
               <p className="text-sm font-medium text-white">发型年轻化优化</p>
               <p className="text-xs text-gray-400 mt-1">
-                自动判断发际线、发量和脸型。若偏秃或发际线偏高，会做自然修复，并按当前氛围与脸型调整发型。
+                自动判断发际线、发量和脸型。如果偏稀或发际线偏高，会做自然修复，并按模板气质微调发型。
               </p>
             </div>
             <button
@@ -238,7 +231,7 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
             <div>
               <p className="text-sm font-medium text-white">人像轻修复</p>
               <p className="text-xs text-gray-400 mt-1">
-                轻微优化眼袋、法令纹和肤色暗沉，让人更精神，但保留真实皮肤纹理与年龄感。
+                轻微优化疲态和肤色问题，但仍然保留真实质感，不做过度磨皮。
               </p>
             </div>
             <button
@@ -261,10 +254,9 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
         </div>
       </div>
 
-      {/* Selected preview */}
       {(selectedStyle || selectedScene) && (
         <div className="bg-dark-100/50 rounded-xl p-4 mb-8">
-          <h4 className="text-sm font-medium text-gray-400 mb-3">已选择</h4>
+          <h4 className="text-sm font-medium text-gray-400 mb-3">已选择的替换模板</h4>
           <div className="flex flex-wrap gap-3">
             {selectedStyle && (
               <div className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-primary-500/20 border border-primary-500/50">
@@ -281,24 +273,18 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
         </div>
       )}
 
-      {/* Action buttons */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => useAppStore.getState().setCurrentStep('upload')}
+          onClick={() => useAppStore.getState().setCurrentStep('design')}
           className="px-6 py-3 text-gray-400 hover:text-white transition-colors"
         >
-          上一步
+          上一步：设计形象
         </button>
         <button
           onClick={() => {
-            // 风格必须选，场景可选（没选场景时自动用第一个）
-            if (!selectedStyleId) {
-              alert('请选择一个姿势风格')
+            if (!selectedStyleId || !selectedSceneId) {
+              alert('请先选好拍照姿势模板和环境模板图')
               return
-            }
-            // 如果没选场景，自动选择第一个
-            if (!selectedSceneId) {
-              setSelectedSceneId(sceneTemplates[0].id)
             }
             useAppStore.getState().setCurrentStep('generate')
             onComplete?.()
@@ -311,14 +297,14 @@ export default function StyleSelector({ onComplete }: StyleSelectorProps) {
               : 'bg-gray-700 text-gray-500 cursor-not-allowed'
           )}
         >
-          开始生成
+          下一步：确认替换生成
         </button>
       </div>
     </div>
   )
 }
 
-function StyleCard({
+function PoseTemplateCard({
   style,
   selected,
   onClick,
@@ -328,43 +314,55 @@ function StyleCard({
   onClick: () => void
 }) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        'relative p-6 rounded-2xl cursor-pointer transition-all duration-300',
+        'overflow-hidden rounded-2xl border-2 text-left transition-all duration-300',
         selected
-          ? 'bg-primary-500/20 border-2 border-primary-500'
-          : 'bg-dark-100/50 border-2 border-transparent hover:border-white/20'
+          ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/15'
+          : 'border-transparent bg-dark-100/50 hover:border-white/20'
       )}
     >
-      <div className="text-4xl mb-4">{style.icon}</div>
-      <h3 className="text-lg font-semibold text-white mb-1">{style.name}</h3>
-      <p className="text-sm text-gray-400 mb-3">{style.nameEn}</p>
-      <p className="text-sm text-gray-500 line-clamp-2">{style.description}</p>
-
-      <div className="flex flex-wrap gap-2 mt-4">
-        {style.tags.map((tag) => (
-          <span
-            key={tag}
-            className="px-2 py-1 text-xs rounded-full bg-white/5 text-gray-400"
-          >
-            {tag}
-          </span>
-        ))}
+      <div className="relative aspect-[4/5] overflow-hidden bg-dark-200">
+        <img
+          src={style.previewUrl}
+          alt={style.name}
+          className="h-full w-full object-cover"
+        />
+        {selected && (
+          <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center">
+            <Check className="w-4 h-4 text-white" />
+          </div>
+        )}
       </div>
-
-      {selected && (
-        <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center">
-          <Check className="w-4 h-4 text-white" />
+      <div className="p-4">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">{style.icon}</span>
+          <div>
+            <h3 className="text-lg font-semibold text-white">{style.name}</h3>
+            <p className="text-sm text-gray-400">{style.nameEn}</p>
+          </div>
         </div>
-      )}
-    </motion.div>
+        <p className="mt-3 text-sm text-gray-400">{style.description}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {style.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-1 text-xs rounded-full bg-white/5 text-gray-300"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </motion.button>
   )
 }
 
-function SceneCard({
+function SceneTemplateCard({
   scene,
   selected,
   onClick,
@@ -374,48 +372,48 @@ function SceneCard({
   onClick: () => void
 }) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        'relative aspect-video rounded-xl overflow-hidden cursor-pointer transition-all duration-300',
+        'overflow-hidden rounded-2xl border-2 text-left transition-all duration-300',
         selected
-          ? 'ring-2 ring-primary-500'
-          : 'hover:ring-2 hover:ring-white/20'
+          ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/15'
+          : 'border-transparent bg-dark-100/50 hover:border-white/20'
       )}
     >
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-4xl opacity-30">🏙️</span>
+      <div className="relative aspect-video overflow-hidden bg-dark-200">
+        <img
+          src={scene.previewUrl}
+          alt={scene.name}
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        {selected && (
+          <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center">
+            <Check className="w-4 h-4 text-white" />
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-sm font-semibold text-white">{scene.name}</h3>
+          <p className="text-xs text-gray-200/80 mt-1">{scene.nameEn}</p>
         </div>
       </div>
-
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-      {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="text-sm font-semibold text-white mb-1">{scene.name}</h3>
-        <div className="flex flex-wrap gap-1">
-          {scene.tags.slice(0, 2).map((tag) => (
+      <div className="p-4">
+        <p className="text-sm text-gray-400">{scene.description}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {scene.tags.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 text-xs rounded-full bg-white/10 text-gray-300"
+              className="px-2 py-1 text-xs rounded-full bg-white/5 text-gray-300"
             >
               {tag}
             </span>
           ))}
         </div>
       </div>
-
-      {/* Selected indicator */}
-      {selected && (
-        <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center">
-          <Check className="w-4 h-4 text-white" />
-        </div>
-      )}
-    </motion.div>
+    </motion.button>
   )
 }

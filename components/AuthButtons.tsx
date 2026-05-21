@@ -67,6 +67,7 @@ export default function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
 
   const hasGoogle = Boolean(providers.google)
   const hasFacebook = Boolean(providers.facebook)
+  const hasDev = Boolean(providers.dev)
 
   return (
     <div className="flex items-center gap-2">
@@ -81,6 +82,19 @@ export default function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
         >
           <LogIn className="w-4 h-4" />
           Google 登录
+        </button>
+      )}
+      {hasDev && (
+        <button
+          onClick={() => startTransition(() => signIn('dev', { callbackUrl: '/' }))}
+          className={cn(
+            'px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-500 transition-colors flex items-center gap-2',
+            isPending && 'opacity-70 cursor-not-allowed'
+          )}
+          disabled={isPending}
+        >
+          <LogIn className="w-4 h-4" />
+          本地登录
         </button>
       )}
       {hasFacebook && (

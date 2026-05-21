@@ -24,7 +24,7 @@ export default function ResultGallery({ onComplete }: ResultGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<GeneratedPhoto | null>(null)
   const [downloading, setDownloading] = useState(false)
 
-  const latestPhotos = generatedPhotos.slice(-4).reverse()
+  const latestPhotos = [...generatedPhotos].reverse()
 
   const handleDownload = async (photo: GeneratedPhoto) => {
     setDownloading(true)
